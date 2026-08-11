@@ -2,6 +2,9 @@
 
 A full-stack expense-splitting application for managing shared trip expenses, calculating balances, and simplifying settlements.
 
+# Demo
+https://splitapp-frontend-82ku.onrender.com
+
 ## Features
 
 - User signup and JWT-based authentication
