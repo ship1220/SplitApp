@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>split</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a href="index.html" class="brand"><span class="logo-emoji">🐿️</span> split</a>
+      <div class="topbar-actions">
+        <button class="pill-btn" id="info-btn">Info</button>
+        <button class="pill-btn dark" id="share-btn">↗ Share</button>
+      </div>
+    </div>
+
+    <div id="loading" class="loading">Loading trip…</div>
+<div id="error-box" class="error-box" style="display:none;"></div>
+
+<div id="trip-root" style="display:none;">
+
+  <div class="trip-header">
+    <div>
+      <h1 class="trip-title" id="trip-title"></h1>
+      <span class="member-chip" id="member-count-chip"></span>
+    </div>
+
+    <span class="badge" id="view-only-badge" style="display:none;">
+      🔒 View only
+    </span>
+  </div>
+
+  <nav class="tabnav">
+    <button class="tab active" data-tab="activity">
+      <span>💵</span> Activity
+    </button>
+
+    <button class="tab" data-tab="people">
+      <span>👥</span> People
+    </button>
+
+    <button class="tab" data-tab="settle">
+      <span>🤝</span> Settle
+    </button>
+  </nav>
+
+
+  <!-- ACTIVITY TAB -->
+  <div id="tab-activity" class="tab-panel">
+
+  <!-- Total Trip Spend -->
+  <div class="stat-card trip-spend-card">
+    <div>
+      <div class="stat-label">Total trip spend</div>
+      <div class="stat-value" id="total-spend">₹0</div>
+    </div>
+
+    <button
+      class="add-expense-card-btn"
+      id="add-expense-fab"
+      type="button"
+      aria-label="Add expense"
+    >
+      +
+    </button>
+  </div>
+
+  <!-- Transactions -->
+  <div class="section-label">
+    Transactions
+  </div>
+
+  <div id="expense-list" class="row-list"></div>
+
+</div>
+
+
+  <!-- PEOPLE TAB -->
+  <div id="tab-people" class="tab-panel" style="display:none;">
+
+    <div class="stat-card">
+      <div class="stat-label">Total members</div>
+      <div class="stat-value" id="member-total">00</div>
+    </div>
+
+    <div id="people-list" class="row-list"></div>
+
+  </div>
+
+
+  <!-- SETTLE TAB -->
+  <div id="tab-settle" class="tab-panel" style="display:none;">
+
+    <div class="section-label">
+      <span>Suggested payments</span>
+      <span class="count-badge" id="transfer-count">0</span>
+    </div>
+
+    <div id="settle-list" class="row-list"></div>
+    <section class="calculation-card" aria-labelledby="calculation-title">
+      <button
+        class="calculation-toggle"
+        id="calculation-toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="calculation-content"
+      >
+        <span class="calculation-icon" aria-hidden="true">▦</span>
+        <span class="calculation-toggle-copy">
+          <span class="calculation-title" id="calculation-title">How is this calculated?</span>
+          <span class="calculation-subtitle">View the full matrix walkthrough</span>
+        </span>
+        <span class="calculation-chevron" aria-hidden="true">⌄</span>
+      </button>
+
+      <div id="calculation-content" class="calculation-content" hidden></div>
+    </section>
+
+  </div>
+
+
+  <!-- FOOTER -->
+  <div class="footer-note">
+    <strong>Data lives on your server</strong>
+
+    <p>
+      Anyone with the share link can view this trip.
+      Give out the edit link only to people you trust to add expenses.
+    </p>
+  </div>
+
+</div>
+
+  <!-- Add expense modal -->
+<div class="modal-backdrop" id="expense-modal" style="display:none;">
+  <div class="modal">
+
+    <h2 class="modal-title">Add expense</h2>
+
+    <div class="field">
+      <label for="exp-desc">What was it for</label>
+      <input
+        id="exp-desc"
+        type="text"
+        placeholder="e.g. Dinner, Cab, Tickets"
+        maxlength="120"
+      />
+    </div>
+
+    <div class="field">
+      <label for="exp-amount">Amount (₹)</label>
+      <input
+        id="exp-amount"
+        type="number"
+        min="0"
+        step="0.01"
+        placeholder="0.00"
+      />
+    </div>
+
+    <div class="field">
+      <label for="exp-paidby">Paid by</label>
+      <select id="exp-paidby"></select>
+    </div>
+
+    <div class="field">
+      <label>Split</label>
+
+      <div class="split-type-toggle" id="split-type-toggle">
+        <button type="button" class="active" data-split="equal">
+          Equal
+        </button>
+        <button type="button" data-split="percentage">
+          Percentage
+        </button>
+        <button type="button" data-split="exact">
+          Exact
+        </button>
+      </div>
+
+      <div id="split-rows"></div>
+      <p class="split-hint" id="split-hint"></p>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn secondary" id="expense-cancel-btn">
+        Cancel
+      </button>
+
+      <button class="btn primary" id="expense-save-btn">
+        Save expense
+      </button>
+    </div>
+
+  </div>
+</div>
+
+  <!-- Expense detail modal -->
+  <div class="modal-backdrop" id="detail-modal" style="display:none;">
+    <div class="modal">
+      <h2 class="modal-title" id="detail-title"></h2>
+      <p class="split-hint" id="detail-sub"></p>
+      <div id="detail-shares" class="row-list" style="margin-top:16px;"></div>
+      <div class="modal-actions">
+        <button class="btn secondary" id="detail-close-btn">Close</button>
+        <button class="btn primary" id="detail-delete-btn" style="background:var(--red);">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Share modal -->
+  <div class="modal-backdrop" id="share-modal" style="display:none;">
+    <div class="modal">
+      <h2 class="modal-title">Share this trip</h2>
+      <p class="split-hint" style="margin-bottom:14px;">Full access — can add expenses and members.</p>
+      <div class="share-link-box">
+        <input id="edit-link" readonly />
+        <button data-copy="edit-link">Copy</button>
+      </div>
+      <p class="split-hint" style="margin-bottom:14px;">View only — can see everything, can't make changes.</p>
+      <div class="share-link-box">
+        <input id="view-link" readonly />
+        <button data-copy="view-link">Copy</button>
+      </div>
+      <div class="modal-actions">
+        <button class="btn secondary" id="share-close-btn" style="flex:none; width:100%;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info modal -->
+  <div class="modal-backdrop" id="info-modal" style="display:none;">
+    <div class="modal">
+      <h2 class="modal-title">How to use</h2>
+      <div class="info-list">
+        <div class="info-item">
+          <h4>1. Add expenses</h4>
+          <p>Tap "+ Add expense" in the Activity tab. Enter what it was for, the amount, who paid, and how to split it — equal, percentage, or exact amounts.</p>
+        </div>
+        <div class="info-item">
+          <h4>2. Check balances</h4>
+          <p>Open the People tab to see who owes and who should receive money. Green means owed money back, orange means owes money.</p>
+        </div>
+        <div class="info-item">
+          <h4>3. Settle up</h4>
+          <p>Go to the Settle tab to see the minimum set of payments needed to clear everything.</p>
+        </div>
+        <div class="info-item">
+          <h4>4. Share the trip</h4>
+          <p>Tap Share to get an edit link (full access) or a view-only link, and send it to the group.</p>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn secondary" id="info-close-btn" style="flex:none; width:100%;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/trip.js?v=3"></script>
+  <script src="js/profile-menu.js"></script>
+</body>
+</html>

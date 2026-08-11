@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>split — track shared expenses</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="landing">
+    <div class="logo-emoji">🐿️</div>
+    <h1>split</h1>
+    <p class="tagline">Split trip expenses quickly and easily.</p>
+
+    <div class="card-form">
+      <div class="field">
+        <label for="trip-name">Trip name</label>
+        <input id="trip-name" type="text" placeholder="e.g. Goa Trip, Birthday" maxlength="80" />
+      </div>
+
+      <div class="field">
+        <label>Who's in?</label>
+        <div id="member-list" class="member-input-list">
+          <div class="member-input-row">
+            <input type="text" class="member-input" placeholder="Member name" maxlength="50" />
+          </div>
+          <div class="member-input-row">
+            <input type="text" class="member-input" placeholder="Member name" maxlength="50" />
+          </div>
+        </div>
+        <button type="button" class="add-member-link" id="add-member-btn">+ Add another person</button>
+      </div>
+
+      <button type="button" class="btn primary" id="create-trip-btn" style="width:100%;">Create trip</button>
+      <p id="create-error" class="split-hint error" style="display:none;"></p>
+    </div>
+
+    <p class="tagline" style="margin-top:20px;">
+      <a href="login.html" id="account-link">Log in to save your trips</a>
+    </p>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/profile-menu.js"></script>
+</body>
+</html>

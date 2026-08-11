@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>split — my trips</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a href="index.html" class="brand"><span class="logo-emoji">🐿️</span> split</a>
+      <div class="topbar-actions">
+        <button class="pill-btn" id="new-trip-btn">+ New trip</button>
+      </div>
+    </div>
+
+    <div id="loading" class="loading">Loading your trips…</div>
+    <div id="error-box" class="error-box" style="display:none;"></div>
+
+    <div id="my-trips-root" style="display:none;">
+      <div class="stat-card trip-spend-card" style="margin-bottom:24px;">
+        <div>
+          <div class="stat-label">Total spend across your trips</div>
+          <div class="stat-value" id="stats-total">₹0</div>
+        </div>
+      </div>
+
+      <div class="section-label">Spend by trip</div>
+      <table style="width:100%; border-collapse:collapse; margin-bottom:32px;">
+        <thead>
+          <tr style="text-align:left; color:var(--ink-soft); font-size:13px;">
+            <th style="padding:8px 4px;">Trip</th>
+            <th style="padding:8px 4px;">Total spend</th>
+          </tr>
+        </thead>
+        <tbody id="stats-table-body"></tbody>
+      </table>
+
+      <div class="section-label">Your trips</div>
+      <div id="trips-list" class="row-list"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/my-trips.js"></script>
+  <script src="js/profile-menu.js"></script>
+</body>
+</html>
