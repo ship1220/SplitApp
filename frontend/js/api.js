@@ -1,6 +1,6 @@
 // Set window.SPLIT_API_BASE before loading this file in production.
 // Local development falls back to the FastAPI server on port 8000.
-const API_BASE = window.SPLIT_API_BASE || "http://127.0.0.1:8000";
+const API_BASE = window.SPLIT_API_BASE || "https://splitapp-api-fuku.onrender.com";
 
 async function apiRequest(path, options = {}) {
   const res = await fetch(`${API_BASE}${path}`, {
