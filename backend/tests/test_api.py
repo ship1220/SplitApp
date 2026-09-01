@@ -190,6 +190,22 @@ def test_unknown_token_returns_404(client):
     assert res.status_code == 404
 
 
+# ---------- rate limiting ----------
+
+def test_rate_limit_returns_429_with_retry_information(client):
+    limiter = client.app.state.rate_limiter
+    limiter.write_limit = 1
+
+    first = client.post("/api/trips", json={"name": "One", "member_names": ["Alice"]})
+    second = client.post("/api/trips", json={"name": "Two", "member_names": ["Bob"]})
+
+    assert first.status_code == 200
+    assert first.headers["X-RateLimit-Limit"] == "1"
+    assert second.status_code == 429
+    assert int(second.headers["Retry-After"]) >= 1
+    assert second.json()["detail"] == "Too many requests. Please try again shortly."
+
+
 # ---------- idempotency ----------
 
 def test_duplicate_idempotency_key_returns_same_expense(client, trip):
