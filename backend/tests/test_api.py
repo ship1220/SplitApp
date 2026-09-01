@@ -69,6 +69,25 @@ def test_deleting_expense_reverses_balances_back_to_zero(client, trip):
         assert b["net"] == 0.0
 
 
+def test_editing_expense_replaces_its_balance_and_total_effect(client, trip):
+    edit_token = trip["edit_token"]
+    alice, bob, carol = (member_id(trip, n) for n in ("Alice", "Bob", "Carol"))
+    created = client.post(f"/api/trips/{edit_token}/expenses", json={
+        "description": "Dinner", "amount": 90, "paid_by": alice, "split_type": "equal",
+        "participants": [{"member_id": alice}, {"member_id": bob}, {"member_id": carol}],
+    }).json()
+
+    updated = client.put(f"/api/trips/{edit_token}/expenses/{created['id']}", json={
+        "description": "Dinner and drinks", "amount": 120, "paid_by": bob, "split_type": "exact",
+        "participants": [{"member_id": alice, "value": 20}, {"member_id": bob, "value": 40}, {"member_id": carol, "value": 60}],
+    })
+    assert updated.status_code == 200
+    detail = client.get(f"/api/trips/{edit_token}").json()
+    balances = {b["member_id"]: b["net"] for b in detail["balances"]}
+    assert detail["total_spend"] == 120.0
+    assert balances == {alice: -20.0, bob: 80.0, carol: -60.0}
+
+
 def test_percentage_and_exact_splits_produce_correct_balances(client, trip):
     edit_token = trip["edit_token"]
     alice, bob, carol = (member_id(trip, n) for n in ("Alice", "Bob", "Carol"))
@@ -144,6 +163,21 @@ def test_view_token_forbidden_on_delete_expense(client, trip):
 
     del_res = client.delete(f"/api/trips/{view_token}/expenses/{expense_id}")
     assert del_res.status_code == 403
+
+
+def test_view_token_forbidden_on_edit_expense(client, trip):
+    edit_token = trip["edit_token"]
+    view_token = trip["view_token"]
+    alice = member_id(trip, "Alice")
+    created = client.post(f"/api/trips/{edit_token}/expenses", json={
+        "description": "Snacks", "amount": 10, "paid_by": alice, "split_type": "equal",
+        "participants": [{"member_id": alice}],
+    }).json()
+    response = client.put(f"/api/trips/{view_token}/expenses/{created['id']}", json={
+        "description": "More snacks", "amount": 20, "paid_by": alice, "split_type": "equal",
+        "participants": [{"member_id": alice}],
+    })
+    assert response.status_code == 403
 
 
 def test_view_token_forbidden_on_add_member(client, trip):

@@ -48,3 +48,24 @@ def delete_expense(token: str, expense_id: str, db: Session = Depends(get_db)):
     if not ok:
         raise HTTPException(status_code=404, detail="Expense not found")
     return {"ok": True}
+
+
+@router.put("/{token}/expenses/{expense_id}", response_model=schemas.ExpenseOut)
+def update_expense(
+    token: str, expense_id: str, expense_in: schemas.ExpenseCreate, db: Session = Depends(get_db)
+):
+    trip = _get_trip_or_404(db, token)
+    _require_edit(trip, token)
+    try:
+        expense = crud.update_expense(db, trip, expense_id, expense_in)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    if not expense:
+        raise HTTPException(status_code=404, detail="Expense not found")
+    return schemas.ExpenseOut(
+        id=expense.id, description=expense.description, amount=expense.amount,
+        paid_by=expense.paid_by_id, paid_by_name=expense.paid_by.name,
+        split_type=expense.split_type.value if hasattr(expense.split_type, "value") else expense.split_type,
+        created_at=expense.created_at,
+        shares=[schemas.ExpenseShareOut(member_id=s.member_id, member_name=s.member.name, amount=s.amount) for s in expense.shares],
+    )

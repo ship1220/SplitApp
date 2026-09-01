@@ -188,6 +188,73 @@ def delete_expense(db: Session, trip: models.Trip, expense_id: str) -> bool:
     return True
 
 
+def update_expense(
+    db: Session, trip: models.Trip, expense_id: str, exp_in: schemas.ExpenseCreate
+) -> Optional[models.Expense]:
+    """Replace an expense and atomically keep cached member balances in sync."""
+    expense = (
+        db.query(models.Expense)
+        .filter(models.Expense.id == expense_id, models.Expense.trip_id == trip.id)
+        .options(joinedload(models.Expense.shares))
+        .first()
+    )
+    if not expense:
+        return None
+
+    members_by_id = {member.id: member for member in trip.members}
+    if exp_in.paid_by not in members_by_id:
+        raise ValueError("paid_by is not a member of this trip")
+    for participant in exp_in.participants:
+        if participant.member_id not in members_by_id:
+            raise ValueError(f"participant {participant.member_id} is not a member of this trip")
+
+    participants = [
+        {"member_id": participant.member_id, "value": participant.value}
+        for participant in exp_in.participants
+    ]
+    resolved = resolve_shares(exp_in.amount, exp_in.split_type, participants)
+
+    updated_expense_id = expense.id
+    try:
+        # First undo the expense as it was previously recorded.
+        old_payer = members_by_id[expense.paid_by_id]
+        old_payer.net_balance = round(old_payer.net_balance - expense.amount, 2)
+        for share in expense.shares:
+            members_by_id[share.member_id].net_balance = round(
+                members_by_id[share.member_id].net_balance + share.amount, 2
+            )
+
+        # Then apply the replacement values and shares.
+        expense.description = exp_in.description.strip()
+        expense.amount = exp_in.amount
+        expense.paid_by_id = exp_in.paid_by
+        expense.split_type = exp_in.split_type
+        for share in list(expense.shares):
+            db.delete(share)
+        db.flush()
+        for member_id, amount in resolved.items():
+            db.add(models.ExpenseShare(expense_id=expense.id, member_id=member_id, amount=amount))
+
+        members_by_id[exp_in.paid_by].net_balance = round(
+            members_by_id[exp_in.paid_by].net_balance + exp_in.amount, 2
+        )
+        for member_id, amount in resolved.items():
+            members_by_id[member_id].net_balance = round(
+                members_by_id[member_id].net_balance - amount, 2
+            )
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+    return (
+        db.query(models.Expense)
+        .filter(models.Expense.id == updated_expense_id)
+        .options(joinedload(models.Expense.paid_by), joinedload(models.Expense.shares).joinedload(models.ExpenseShare.member))
+        .first()
+    )
+
+
 # ---------- Balances / Settlement ----------
 
 def compute_balances(db: Session, trip: models.Trip):

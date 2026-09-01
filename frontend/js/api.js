@@ -1,6 +1,24 @@
-// Set window.SPLIT_API_BASE before loading this file in production.
-// Local development falls back to the FastAPI server on port 8000.
-const API_BASE = window.SPLIT_API_BASE || "https://splitapp-api-fuku.onrender.com";
+// Set window.SPLIT_API_BASE before loading this file when you want to point
+// at a different backend. Local development falls back to the FastAPI server
+// on port 8000, and deployed pages can override it explicitly.
+function resolveApiBase(globalScope = typeof window !== "undefined" ? window : globalThis) {
+  if (globalScope.SPLIT_API_BASE) {
+    return globalScope.SPLIT_API_BASE;
+  }
+
+  const hostname = globalScope.location?.hostname || "";
+  if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "0.0.0.0") {
+    return "http://127.0.0.1:8000";
+  }
+
+  return "http://127.0.0.1:8000";
+}
+
+const API_BASE = resolveApiBase();
+
+if (typeof module !== "undefined") {
+  module.exports = { resolveApiBase };
+}
 
 async function apiRequest(path, options = {}) {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -51,6 +69,12 @@ const Api = {
   deleteExpense: (token, expenseId) =>
     apiRequest(`/api/trips/${token}/expenses/${expenseId}`, {
       method: "DELETE",
+    }),
+
+  updateExpense: (token, expenseId, payload) =>
+    apiRequest(`/api/trips/${token}/expenses/${expenseId}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
     }),
 
   // ---- auth (optional accounts; anonymous trip flow above is unaffected) ----

@@ -5,6 +5,7 @@ let trip = null;
 let isEditor = false;
 let activeSplitType = "equal";
 let activeTab = "activity";
+let editingExpenseId = null;
 
 const AVATAR_PALETTE = ["1", "2", "3", "4", "5"];
 
@@ -279,6 +280,9 @@ calculationToggle.addEventListener("click", () => {
 const expenseModal = document.getElementById("expense-modal");
 
 function openExpenseModal() {
+  editingExpenseId = null;
+  document.getElementById("expense-modal-title").textContent = "Add expense";
+  document.getElementById("expense-save-label").textContent = "Save expense";
   document.getElementById("exp-desc").value = "";
   document.getElementById("exp-amount").value = "";
   const paidBySel = document.getElementById("exp-paidby");
@@ -287,6 +291,35 @@ function openExpenseModal() {
   activeSplitType = "equal";
   document.querySelectorAll("#split-type-toggle button").forEach((b) => b.classList.toggle("active", b.dataset.split === "equal"));
   renderSplitRows();
+  expenseModal.style.display = "flex";
+}
+
+function openEditExpenseModal(expenseId) {
+  const expense = trip.expenses.find((item) => item.id === expenseId);
+  if (!expense) return;
+  editingExpenseId = expenseId;
+  document.getElementById("expense-modal-title").textContent = "Edit expense";
+  document.getElementById("expense-save-label").textContent = "Save changes";
+  document.getElementById("exp-desc").value = expense.description;
+  document.getElementById("exp-amount").value = expense.amount;
+  const paidBySel = document.getElementById("exp-paidby");
+  paidBySel.innerHTML = trip.members.map((m) => `<option value="${m.id}">${escapeHtml(m.name)}</option>`).join("");
+  paidBySel.value = expense.paid_by;
+  activeSplitType = expense.split_type;
+  document.querySelectorAll("#split-type-toggle button").forEach((button) => button.classList.toggle("active", button.dataset.split === activeSplitType));
+  renderSplitRows();
+  const shareByMember = new Map(expense.shares.map((share) => [share.member_id, share.amount]));
+  document.querySelectorAll(".split-row").forEach((row) => {
+    const share = shareByMember.get(row.dataset.member);
+    if (activeSplitType === "equal") {
+      row.querySelector(".split-include").checked = share !== undefined;
+    } else if (share !== undefined) {
+      row.querySelector(".split-value").value = activeSplitType === "percentage"
+        ? Math.round((share / expense.amount) * 10000) / 100
+        : share;
+    }
+  });
+  updateSplitHint();
   expenseModal.style.display = "flex";
 }
 
@@ -383,22 +416,24 @@ document.getElementById("expense-save-btn").addEventListener("click", async () =
   btn.textContent = "Saving…";
 
   try {
-    await Api.addExpense(TOKEN, {
+    const payload = {
       description,
       amount,
       paid_by: paidBy,
       split_type: activeSplitType,
       participants,
-    });
+    };
+    if (editingExpenseId) await Api.updateExpense(TOKEN, editingExpenseId, payload);
+    else await Api.addExpense(TOKEN, payload);
     expenseModal.style.display = "none";
     trip = await Api.getTrip(TOKEN);
     renderAll();
-    showToast("Expense added");
+    showToast(editingExpenseId ? "Expense updated" : "Expense added");
   } catch (err) {
     showToast(err.message || "Couldn't save that expense");
   } finally {
     btn.disabled = false;
-    btn.textContent = "Save expense";
+    btn.innerHTML = `<span id="expense-save-label">${editingExpenseId ? "Save changes" : "Save expense"}</span>`;
   }
 });
 
@@ -426,10 +461,17 @@ function openExpenseDetail(expenseId) {
     .join("");
 
   document.getElementById("detail-delete-btn").style.display = isEditor ? "block" : "none";
+  document.getElementById("detail-edit-btn").style.display = isEditor ? "block" : "none";
   detailModal.style.display = "flex";
 }
 
 document.getElementById("detail-close-btn").addEventListener("click", () => (detailModal.style.display = "none"));
+
+document.getElementById("detail-edit-btn").addEventListener("click", () => {
+  if (!currentDetailExpenseId) return;
+  detailModal.style.display = "none";
+  openEditExpenseModal(currentDetailExpenseId);
+});
 
 document.getElementById("detail-delete-btn").addEventListener("click", async () => {
   if (!currentDetailExpenseId) return;

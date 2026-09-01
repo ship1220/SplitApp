@@ -139,7 +139,7 @@
 <div class="modal-backdrop" id="expense-modal" style="display:none;">
   <div class="modal">
 
-    <h2 class="modal-title">Add expense</h2>
+    <h2 class="modal-title" id="expense-modal-title">Add expense</h2>
 
     <div class="field">
       <label for="exp-desc">What was it for</label>
@@ -192,7 +192,7 @@
       </button>
 
       <button class="btn primary" id="expense-save-btn">
-        Save expense
+        <span id="expense-save-label">Save expense</span>
       </button>
     </div>
 
@@ -207,6 +207,7 @@
       <div id="detail-shares" class="row-list" style="margin-top:16px;"></div>
       <div class="modal-actions">
         <button class="btn secondary" id="detail-close-btn">Close</button>
+        <button class="btn primary" id="detail-edit-btn">Edit</button>
         <button class="btn primary" id="detail-delete-btn" style="background:var(--red);">Delete</button>
       </div>
     </div>
@@ -263,7 +264,7 @@
   <div id="toast" class="toast"></div>
 
   <script>
-    window.SPLIT_API_BASE = "https://splitapp-api-fuku.onrender.com";
+    window.SPLIT_API_BASE = "http://127.0.0.1:8000";
 </script>
 <script src="js/api.js"></script>
   <script src="js/auth.js"></script>
