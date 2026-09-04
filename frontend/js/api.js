@@ -11,7 +11,7 @@ function resolveApiBase(globalScope = typeof window !== "undefined" ? window : g
     return "http://127.0.0.1:8000";
   }
 
-  return "http://127.0.0.1:8000";
+  return "https://splitapp-api-fuku.onrender.com";
 }
 
 const API_BASE = resolveApiBase();
