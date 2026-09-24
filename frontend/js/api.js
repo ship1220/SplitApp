@@ -1,10 +1,6 @@
 // Set window.SPLIT_API_BASE before loading this file when you want to point
 // at a different backend. Local development falls back to the FastAPI server
-<<<<<<< HEAD
 // on port 8000; deployed pages use same-origin /api routes.
-=======
-// on port 8000, and deployed pages can override it explicitly.
->>>>>>> c3d0e849026294fb6cda30f6174861620dd00cfa
 function resolveApiBase(globalScope = typeof window !== "undefined" ? window : globalThis) {
   if (globalScope.SPLIT_API_BASE) {
     return globalScope.SPLIT_API_BASE;
@@ -15,11 +11,7 @@ function resolveApiBase(globalScope = typeof window !== "undefined" ? window : g
     return "http://127.0.0.1:8000";
   }
 
-<<<<<<< HEAD
   return "";
-=======
-  return "https://splitapp-api-fuku.onrender.com";
->>>>>>> c3d0e849026294fb6cda30f6174861620dd00cfa
 }
 
 const API_BASE = resolveApiBase();
