@@ -2,7 +2,6 @@ import os
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-<<<<<<< HEAD
 from sqlalchemy.pool import NullPool
 
 # Local development falls back to SQLite. Vercel Functions have an ephemeral
@@ -15,21 +14,12 @@ DATABASE_URL = database_url or "sqlite:///./split.db"
 # Some managed database providers publish the legacy postgres:// scheme.
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-=======
-
-# Local development falls back to SQLite.
-# Production should provide a PostgreSQL DATABASE_URL through the host's
-# environment variables.
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./split.db")
->>>>>>> c3d0e849026294fb6cda30f6174861620dd00cfa
-
 connect_args = (
     {"check_same_thread": False}
     if DATABASE_URL.startswith("sqlite")
     else {}
 )
 
-<<<<<<< HEAD
 engine_options = {
     "connect_args": connect_args,
     "pool_pre_ping": True,
@@ -40,13 +30,6 @@ if os.getenv("VERCEL"):
     engine_options["poolclass"] = NullPool
 
 engine = create_engine(DATABASE_URL, **engine_options)
-=======
-engine = create_engine(
-    DATABASE_URL,
-    connect_args=connect_args,
-    pool_pre_ping=True,
-)
->>>>>>> c3d0e849026294fb6cda30f6174861620dd00cfa
 
 SessionLocal = sessionmaker(
     autocommit=False,
