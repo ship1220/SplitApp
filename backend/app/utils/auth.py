@@ -18,11 +18,17 @@ from sqlalchemy.orm import Session
 from .. import models
 from ..database import get_db
 
+<<<<<<< HEAD
 # In production set JWT_SECRET to a long random value. Keep the fallback for
 # local development, but fail fast on Vercel rather than issuing weak tokens.
 if os.getenv("VERCEL") and not os.getenv("JWT_SECRET"):
     raise RuntimeError("JWT_SECRET must be configured in the Vercel environment")
 
+=======
+# In production set JWT_SECRET to a long random value.
+# The development fallback keeps local setup simple; Render should always
+# provide JWT_SECRET as an environment variable.
+>>>>>>> c3d0e849026294fb6cda30f6174861620dd00cfa
 JWT_SECRET = os.getenv("JWT_SECRET", "dev-secret-change-me")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 24 * 60  # 24h

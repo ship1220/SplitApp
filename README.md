@@ -61,6 +61,7 @@ SplitApp/
 │   └── js/
 │
 └── render.yaml
+<<<<<<< HEAD
 
 ## Deploy on Vercel
 
@@ -87,3 +88,5 @@ Apply migrations with the same connection string in future releases when a new A
 3. Deploy. Open `/api/health` on the resulting domain; it should return `{"status":"ok"}`.
 
 The current Render deployment can stay online during setup. Once the Vercel deployment and its database have been populated and checked, update your public link to the Vercel domain.
+=======
+>>>>>>> c3d0e849026294fb6cda30f6174861620dd00cfa
