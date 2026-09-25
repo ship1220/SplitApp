@@ -3,7 +3,7 @@
 A full-stack expense-splitting application for managing shared trip expenses, calculating balances, and simplifying settlements.
 
 # Demo
-splitapp-sigma.vercel.app
+https://splitapp-sigma.vercel.app
 
 ## Features
 
